@@ -93,3 +93,10 @@ deploy:
   type: git
   repo: git@github.com:donley828/blog.git
   branch: gh-pages
+
+math:
+  engine: 'mathjax' # or 'katex'
+  mathjax:
+    # src: custom_mathjax_source
+    config:
+      # MathJax config
