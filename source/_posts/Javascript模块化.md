@@ -1,7 +1,7 @@
 ---
 title: Javascript模块化
 date: 2017-10-16 17:17:34
-tags: [Javascript,模块化,前端]
+tags: [JavaScript,模块化,前端]
 categories: 前端
 ---
 
