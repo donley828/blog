@@ -1,8 +1,8 @@
 .DS_Store
 Thumbs.db
+package-lock.json
 db.json
 *.log
 node_modules/
 public/
 .deploy*/
-package-lock.json
