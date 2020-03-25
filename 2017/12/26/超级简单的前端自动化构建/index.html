@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="donley">
+
+
+
+    <meta name="description" content="热爱这个破碎的世界吧">
+
+
+
+<title>超级简单的前端自动化构建 | Donley&#39;s Notes</title>
+
+
+
+    <link rel="icon" href="/blog/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/blog/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/blog/js/script.js"></script>
+    
+    <script src="/blog/js/tocbot.min.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/blog/">Donley&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/blog/">Donley&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">超级简单的前端自动化构建</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">donley</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">December 26, 2017&nbsp;&nbsp;13:17:52</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/blog/categories/前端/">前端</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="为什么要自动化"><a href="#为什么要自动化" class="headerlink" title="为什么要自动化"></a>为什么要自动化</h2><blockquote>
+<p>你好，切图仔！<br></p>
+</blockquote>
+<p>现在的前端早已不是简单的静态页面开发，一些大型的 Web App 动辄几千行甚至上万行代码，所以如何构建本地开发环境尤为重要。本篇文章将以 gulp 为例，从编译、文件合并、文件压缩、单元测试等几个角度从零开始搭建一个简单的前端开发环境。</p>
+<a id="more"></a>
+<p><strong>Github 地址：<a href="https://github.com/donley828/gulp-demo" target="_blank">gulp-demo</a></strong></p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>抛开项目类型，一个项目 Js 文件和目录结构应该有以下几个特点：</p>
+<ul>
+<li>一个文件只包含一个对象</li>
+<li>相关的文件用目录分组</li>
+<li>保持第三方代码的独立</li>
+<li>确定创建文位置</li>
+<li>保持测试代码的完整性</li>
+</ul>
+<p>以 jQuery 项目的目录结构为例<br><br><img src="/blog/images/jq.png" alt><br><br>build：用来放置最终构建后的文件（不应该被提交）<br>src：用来放置所有的源文件，包括用例进行文件分组的子目录<br>test：用来放置测试文件，包含一些同源代码目录对应的子目录或文件<br>external：用来存放一些外部拓展文件<br>Gruntfile.js：grunt 配置文件，用来配置或定义任务并加载 Grunt 插件<br>package.json：描述了一个 NPM 包的所有相关信息<br>.eslintrc：Eslint 配置文件</p>
+<h2 id="从零开始"><a href="#从零开始" class="headerlink" title="从零开始"></a>从零开始</h2><h3 id="创建一个-Gulp-项目"><a href="#创建一个-Gulp-项目" class="headerlink" title="创建一个 Gulp 项目"></a>创建一个 Gulp 项目</h3><p>假设你已经安装了 Node，通过<code>npm init</code>初始化一个<code>package.json</code>文件 ，然后新建一个<code>gulpfile.js</code>文件，执行<code>npm install grunt --save-dev</code>安装 Gulp。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//gulpfile.js</span></span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'default'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行 gulp</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gulp</span><br></pre></td></tr></table></figure>
+<p>使用命令<code>gulp</code>会使默认是的名为 default 的任务（task）将会被运行，此示例未做任何事情。</p>
+<h3 id="ESLint"><a href="#ESLint" class="headerlink" title="ESLint"></a>ESLint</h3><p>在团队开发中，编程风格（style guideline）和编码规范（code convention）的一致性是及其重要的，即时是缩进统一，也会给后期维护节省大量的时间成本。所以使用像 ESLint 这样的工具是很有必要的，不仅可以找出代码中潜在的错误，而且能针对你的代码给出编程风格上的警告。</p>
+<p>安装 gulp-eslint</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm i --save-dev gulp-eslint</span><br></pre></td></tr></table></figure>
+<p>给<code>gulpfile</code>添加 lint 任务</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'lint'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp</span><br><span class="line">    .src([<span class="string">'**/*.js'</span>, <span class="string">'!node_modules/**'</span>])</span><br><span class="line">    .pipe(eslint())</span><br><span class="line">    .pipe(eslint.formatEach(<span class="string">'compact'</span>, process.stderr));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="使用-gulp-concat-和-gulp-uglify-合并压缩"><a href="#使用-gulp-concat-和-gulp-uglify-合并压缩" class="headerlink" title="使用 gulp-concat 和 gulp-uglify 合并压缩"></a>使用 gulp-concat 和 gulp-uglify 合并压缩</h3><p>如果恰当的组织 javaScript 文件，那么每个文件就只包含一个对象，但是会带来一个问题，就是会增加网络请求数。所以应该将文件合并，合并之后进行压缩工作，尽可能的缩小文件大小。</p>
+<p>安装 gulp-concat 和 gulp-uglify</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm i --save-dev gulp-concat gulp-uglify</span><br></pre></td></tr></table></figure>
+<p>添加 javaScript 任务到<code>gulpfile.js</code>中</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'javascript'</span>, [<span class="string">'lint'</span>], <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp</span><br><span class="line">    .src(<span class="string">'src/**/*.js'</span>)</span><br><span class="line">    .pipe(sourcemaps.init())</span><br><span class="line">    .pipe(concat(<span class="string">'all.js'</span>))</span><br><span class="line">    .pipe(uglify())</span><br><span class="line">    .pipe(sourcemaps.write())</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'dist'</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>然后修改<code>gulp.task(..)</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'default'</span>, [<span class="string">'lint'</span>, <span class="string">'javascript'</span>], <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br></pre></td></tr></table></figure>
+<p>合并和压缩任务添加结束之后我们可以在<code>src</code>文件夹里尝试一下,添加<code>add.js</code>和<code>multiply.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//add.js</span></span><br><span class="line"><span class="keyword">var</span> add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = add;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//multiply.js</span></span><br><span class="line"><span class="keyword">var</span> multiply = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> x * y;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = multiply;</span><br></pre></td></tr></table></figure>
+<p>执行<code>gulp</code>,控制台会输出如下内容，项目目录会生成<code>dist</code>文件夹，里面存放压缩并合并后的<code>all.js</code>文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ gulp</span><br><span class="line">[21:23:44] Using gulpfile gulpfile.js</span><br><span class="line">[21:23:44] Starting <span class="string">'lint'</span>...</span><br><span class="line">1 problem[21:23:45] Finished <span class="string">'lint'</span> after 657 ms</span><br><span class="line">[21:23:45] Starting <span class="string">'javascript'</span>...</span><br><span class="line">[21:23:45] Finished <span class="string">'javascript'</span> after 57 ms</span><br><span class="line">[21:23:45] Starting <span class="string">'default'</span>...</span><br><span class="line">[21:23:45] Finished <span class="string">'default'</span> after 29 μs</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//all.js</span></span><br><span class="line"><span class="keyword">var</span> add=<span class="function"><span class="keyword">function</span>(<span class="params">r,t</span>)</span>&#123;<span class="keyword">return</span> r+t&#125;;<span class="built_in">module</span>.exports=add;<span class="keyword">var</span> multiply=<span class="function"><span class="keyword">function</span>(<span class="params">r,t</span>)</span>&#123;<span class="keyword">return</span> r*t&#125;;<span class="built_in">module</span>.exports=multiply;</span><br><span class="line"><span class="comment">//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImFkZC5qcyIsIm11bHRpcGx5LmpzIl0sIm5hbWVzIjpbImFkZCIsIngiLCJ5IiwibW9kdWxlIiwiZXhwb3J0cyIsIm11bHRpcGx5Il0sIm1hcHBpbmdzIjoiQUFBQSxJQUFBQSxJQUFBLFNBQUFDLEVBQUFDLEdBQ0EsT0FBQUQsRUFBQUMsR0FHQUMsT0FBQUMsUUFBQUosSUNKQSxJQUFBSyxTQUFBLFNBQUFKLEVBQUFDLEdBQ0EsT0FBQUQsRUFBQUMsR0FHQUMsT0FBQUMsUUFBQUMiLCJmaWxlIjoiYWxsLmpzIiwic291cmNlc0NvbnRlbnQiOlsidmFyIGFkZCA9IGZ1bmN0aW9uKHgsIHkpIHtcclxuXHRyZXR1cm4geCArIHk7XHJcbn07XHJcblxyXG5tb2R1bGUuZXhwb3J0cyA9IGFkZDtcclxuIiwidmFyIG11bHRpcGx5ID0gZnVuY3Rpb24oeCwgeSkge1xyXG5cdHJldHVybiB4ICogeTtcclxufTtcclxuXHJcbm1vZHVsZS5leHBvcnRzID0gbXVsdGlwbHk7XHJcbiJdfQ==</span></span><br></pre></td></tr></table></figure>
+<h3 id="自动化测试"><a href="#自动化测试" class="headerlink" title="自动化测试"></a>自动化测试</h3><p>安装 gulp-mocha 和 chai ，前者是一款测试框架，就是运行测试的工具，在浏览器和 Node 环境都可以使用，添加测试，从而保证代码的质量。chai 是一款 js 断言库，就是判断源码的实际执行结果与预期结果是否一致。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm i --save-dev gulp-mocha chai</span><br></pre></td></tr></table></figure>
+<p>为<code>add.js</code>和<code>multiply.js</code>添加测试脚本<code>add.test.js</code>和<code>multiply.test.js</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//add.test.js</span></span><br><span class="line"><span class="keyword">var</span> add = <span class="built_in">require</span>(<span class="string">'../src/add.js'</span>);</span><br><span class="line"><span class="keyword">var</span> expect = <span class="built_in">require</span>(<span class="string">'chai'</span>).expect;</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'加法函数的测试'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  it(<span class="string">'1 加 1 应该等于 2'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    expect(add(<span class="number">1</span>, <span class="number">1</span>)).to.be.equal(<span class="number">2</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//multiply.test.js</span></span><br><span class="line"><span class="keyword">var</span> multiply = <span class="built_in">require</span>(<span class="string">'../src/multiply.js'</span>);</span><br><span class="line"><span class="keyword">var</span> expect = <span class="built_in">require</span>(<span class="string">'chai'</span>).expect;</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'乘法函数的测试'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  it(<span class="string">'2 乘 2 应该等于 4'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    expect(multiply(<span class="number">2</span>, <span class="number">2</span>)).to.be.equal(<span class="number">4</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>describe</code>块称为”测试套件”（test suite），表示一组相关的测试。它是一个函数，第一个参数是测试套件的名称（”加法函数的测试”），第二个参数是一个实际执行的函数。<br><code>it</code>块称为”测试用例”（test case），表示一个单独的测试，是测试的最小单位。它也是一个函数，第一个参数是测试用例的名称（”1 加 1 应该等于 2”），第二个参数是一个实际执行的函数。</p>
+<p>添加 gulp 任务</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'test'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'test/*.test.js'</span>, &#123; <span class="attr">read</span>: <span class="literal">false</span> &#125;).pipe(</span><br><span class="line">    mocha(&#123;</span><br><span class="line">      reporter: <span class="string">'spec'</span></span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>执行<code>gulp test</code>，如下输出</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[21:37:31] Starting <span class="string">'test'</span>...</span><br><span class="line">  加法函数的测试</span><br><span class="line">    √ 1 加 1 应该等于 2</span><br><span class="line">  乘法函数的测试</span><br><span class="line">    √ 2 乘 2 应该等于 4</span><br><span class="line">  2 passing (6ms)</span><br><span class="line">[21:37:32] Finished <span class="string">'test'</span> after 502 ms</span><br></pre></td></tr></table></figure>
+<p>表示测试通过</p>
+<h2 id="Webpack"><a href="#Webpack" class="headerlink" title="Webpack"></a>Webpack</h2><p>Webpack 是一款优秀的前端模块打包器，它可以找到 JavaScript 模块以及其它的一些浏览器不能直接运行的拓展语言（Scss，TypeScript 等），并将其转换和打包为合适的格式供浏览器使用。与 Gulp/Grunt 相比，Gulp/Grunt 是一种能够优化前端开发流程的工具，Webpack 是一种模块化的解决方案，同时 Webpack 在很多场景下可以替代 Gulp/Grunt 这类工具。所以 Webpack 是非常值得学习的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇文章是在读完 <a href="https://book.douban.com/subject/21792530/" target="_blank">《编写可维护的 JavaScript》</a> 这本书之后，做的总结性实践类文章。总之，如今的前端工程化完善，本文的例子只是很简单的内容，<code>gulp</code>的具体使用，复杂应用的测试等内容还有待深入。</p>
+<p><strong>Github 地址：<a href="https://github.com/donley828/gulp-demo" target="_blank">gulp-demo</a></strong></p>
+<blockquote>
+<p>Reference:<br><a href="https://www.gulpjs.com.cn/" target="_blank">Gulp 中文网</a><br><a href="http://www.ruanyifeng.com/blog/2015/12/a-mocha-tutorial-of-examples.html" target="_blank">测试框架 Mocha 实例教程</a></p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>donley</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://donglei.site/blog/2017/12/26/超级简单的前端自动化构建/">http://donglei.site/blog/2017/12/26/超级简单的前端自动化构建/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY<strong>?</strong></strong></span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/blog/tags/前端/"># 前端</a>
+                    
+                        <a href="/blog/tags/模块化/"># 模块化</a>
+                    
+                        <a href="/blog/tags/自动化/"># 自动化</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/blog/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/blog/2018/03/20/Redux学习总结/">Redux学习总结</a>
+            
+            
+            <a class="next" rel="next" href="/blog/2017/10/16/Javascript模块化/">Javascript模块化</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <!-- <span>© donley | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span> -->
+        <span>© donley</span>
+    </div>
+</footer>
+
+    </div><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+</body>
+</html>

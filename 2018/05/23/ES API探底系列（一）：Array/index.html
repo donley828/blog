@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="donley">
+
+
+
+    <meta name="description" content="热爱这个破碎的世界吧">
+
+
+
+<title>ES API探底系列（一）：Array | Donley&#39;s Notes</title>
+
+
+
+    <link rel="icon" href="/blog/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/blog/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/blog/js/script.js"></script>
+    
+    <script src="/blog/js/tocbot.min.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/blog/">Donley&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/blog/">Donley&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">ES API探底系列（一）：Array</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">donley</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">May 23, 2018&nbsp;&nbsp;17:07:17</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/blog/categories/前端/">前端</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>这段时间工作不太饱和，趁现在补补基础，写这个系列的目的只有一个就是复习。<br>毕竟写博客的过程在于纪录和成长，结果只是次要的。<br>不包含已经废弃掉的方法。<br><a id="more"></a></p>
+<p>JS 中的数组是类似于列表的一种高阶对象</p>
+<h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><h3 id="Array-length"><a href="#Array-length" class="headerlink" title="Array.length"></a>Array.length</h3><p>length 属性的值是一个 0 到 2^32-1 的整数。<br><code>length</code>是 Array 实例的一个属性，它可以被显式设置，如果设置超过数组长度的值，多出来的部分会被设置为<code>undefined</code>，如果设置为小于数组长度的值则数组会被截断。</p>
+<h3 id="Array-prototype"><a href="#Array-prototype" class="headerlink" title="Array.prototype"></a>Array.prototype</h3><p>是<code>Array</code>构造函数的原型，通过给它设置方法或者属性可供所有数组使用。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Array</span>.isArray(<span class="built_in">Array</span>.prototype); </span><br><span class="line"><span class="comment">// true</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="Array-from"><a href="#Array-from" class="headerlink" title="Array.from()"></a>Array.from()</h3><p><code>Array.from(arrayLike[, mapFn[, thisArg]])</code>从一个类似数组或可迭代对象中创建一个新的数组。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Array</span>.from(<span class="string">'foo'</span>));</span><br><span class="line"><span class="comment">// expected output: Array ["f", "o", "o"]</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Array</span>.from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], x =&gt; x + x));</span><br><span class="line"><span class="comment">// expected output: Array [2, 4, 6]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//数组去重</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">combine</span>(<span class="params"></span>)</span>&#123; </span><br><span class="line">    <span class="keyword">let</span> arr = [].concat.apply([], <span class="built_in">arguments</span>);  <span class="comment">//没有去重复的新数组 </span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Array</span>.from(<span class="keyword">new</span> <span class="built_in">Set</span>(arr));</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">var</span> m = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>], n = [<span class="number">2</span>,<span class="number">3</span>,<span class="number">3</span>]; </span><br><span class="line"><span class="built_in">console</span>.log(combine(m,n));                     <span class="comment">// [1, 2, 3]</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-isArray"><a href="#Array-isArray" class="headerlink" title="Array.isArray()"></a>Array.isArray()</h3><p><code>Array.isArray(obj)</code>确定传的值是不是一个 <code>Array</code>。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面的函数调用都返回 true</span></span><br><span class="line"><span class="built_in">Array</span>.isArray([]);</span><br><span class="line"><span class="built_in">Array</span>.isArray([<span class="number">1</span>]);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="keyword">new</span> <span class="built_in">Array</span>());</span><br><span class="line"><span class="comment">// 鲜为人知的事实：其实 Array.prototype 也是一个数组。</span></span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="built_in">Array</span>.prototype); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 下面的函数调用都返回 false</span></span><br><span class="line"><span class="built_in">Array</span>.isArray();</span><br><span class="line"><span class="built_in">Array</span>.isArray(&#123;&#125;);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="literal">null</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="literal">undefined</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="number">17</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="string">'Array'</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="literal">true</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(<span class="literal">false</span>);</span><br><span class="line"><span class="built_in">Array</span>.isArray(&#123; <span class="attr">__proto__</span>: <span class="built_in">Array</span>.prototype &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>尽量使用<code>isArray</code>而不是<code>instanceof</code>,前者可以检测 iframes。</p>
+<h3 id="Array-of"><a href="#Array-of" class="headerlink" title="Array.of()"></a>Array.of()</h3><p><code>Array.of(num)</code> 返回一个长度为 num 的数组，是空位不是 undefined。</p>
+<h3 id="Array-prototype-contact"><a href="#Array-prototype-contact" class="headerlink" title="Array.prototype.contact()"></a>Array.prototype.contact()</h3><p><code>contact(arr1,arr2..)</code>用于合并一个或多个数组。会返回一个新的数组。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br><span class="line"><span class="keyword">var</span> array2 = [<span class="string">'d'</span>, <span class="string">'e'</span>, <span class="string">'f'</span>];</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(array1.concat(array2));</span><br><span class="line"><span class="comment">// expected output: Array ["a", "b", "c", "d", "e", "f"]</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-prototype-copyWithin"><a href="#Array-prototype-copyWithin" class="headerlink" title="Array.prototype.copyWithin()"></a>Array.prototype.copyWithin()</h3><p><code>copyWithin(target, start, end)</code>浅复制数组的一部分到同一数组的另一个位置，并且返回，原数组会被修改，被移动的部分大小不会被改变。这个方法的三个参数都是整数。<br>如果<code>target</code>大于数组的<code>length</code>，不会被拷贝。如果<code>target</code>在<code>start</code>之后，将会被修改。<br>如果<code>start</code>或者<code>end</code>为负数，会从末尾开始计算。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array1 = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// place at position 0 the element between position 3 and 4</span></span><br><span class="line"><span class="built_in">console</span>.log(array1.copyWithin(<span class="number">0</span>, <span class="number">3</span>, <span class="number">4</span>));</span><br><span class="line"><span class="comment">// expected output: Array [4, 2, 3, 4, 5]</span></span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>].copyWithin(<span class="number">-2</span>, <span class="number">-3</span>, <span class="number">-1</span>);</span><br><span class="line"><span class="comment">// [1, 2, 3, 3, 4]</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-prototype-entries"><a href="#Array-prototype-entries" class="headerlink" title="Array.prototype.entries()"></a>Array.prototype.entries()</h3><p><code>entries()</code>返回一个新的<strong>Array Iterator</strong>对象，该对象包含调用这个方法的数组中每个索引的键值。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> iterator1 = array1.entries();</span><br><span class="line"><span class="built_in">console</span>.log(iterator1.next().value);</span><br><span class="line"><span class="comment">// expected output: Array [0, "a"]</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(iterator1.next().value);</span><br><span class="line"><span class="comment">// expected output: Array [1, "b"]</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-prototype-every"><a href="#Array-prototype-every" class="headerlink" title="Array.prototype.every()"></a>Array.prototype.every()</h3><p><code>every(callback, thisArg)</code>方法测试数组的所有元素是否都通过了指定函数的测试。<br>如果数组的所有元素都通过了<code>callback</code>，这个方法则返回<code>true</code>，反之则返回<code>false</code>。<br><code>callback</code>参数为测试函数，<code>thisArg</code>参数可以指定执行<code>callback</code>时<code>this</code>的值。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isBigEnough</span>(<span class="params">element, index, array</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> (element &gt;= <span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> passed = [<span class="number">12</span>, <span class="number">5</span>, <span class="number">8</span>, <span class="number">130</span>, <span class="number">44</span>].every(isBigEnough);</span><br><span class="line"><span class="comment">// passed is false</span></span><br><span class="line">passed = [<span class="number">12</span>, <span class="number">54</span>, <span class="number">18</span>, <span class="number">130</span>, <span class="number">44</span>].every(isBigEnough);</span><br><span class="line"><span class="comment">// passed is true</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-prototype-fill"><a href="#Array-prototype-fill" class="headerlink" title="Array.prototype.fill()"></a>Array.prototype.fill()</h3><p><code>fill(value, start, end)</code>用一个固定值填充数组的某一部分，不包括<code>end</code>索引。<br>参数<code>start</code>和<code>end</code>默认值分别为0和数组的<code>length</code>。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>].fill(<span class="number">4</span>);               <span class="comment">// [4, 4, 4]</span></span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>].fill(<span class="number">4</span>, <span class="number">1</span>);            <span class="comment">// [1, 4, 4]</span></span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>].fill(<span class="number">4</span>, <span class="number">-3</span>, <span class="number">-2</span>);       <span class="comment">// [4, 2, 3]</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Array-prototype-filter"><a href="#Array-prototype-filter" class="headerlink" title="Array.prototype.filter()"></a>Array.prototype.filter()</h3><p><code>filter(callback(element, index, array))[thisArg]</code>方法创建一个新数组, 其包含通过所提供函数实现的测试的所有元素。<br><code>callback</code>参数是用来测试的函数。<code>element</code>当前正在处理的元素。<code>index</code>正在处理的元素的索引。<code>array</code>调用了filter的数组。<code>thisArg</code>执行<code>callback</code>时的用于this的值。</p>
+<h3 id="Array-prototype-find"><a href="#Array-prototype-find" class="headerlink" title="Array.prototype.find()"></a>Array.prototype.find()</h3><h3 id="Array-prototype-findIndex"><a href="#Array-prototype-findIndex" class="headerlink" title="Array.prototype.findIndex()"></a>Array.prototype.findIndex()</h3><h3 id="🔍-Array-prototype-flat"><a href="#🔍-Array-prototype-flat" class="headerlink" title="🔍 Array.prototype.flat()"></a>🔍 Array.prototype.flat()</h3><h3 id="🔍-Array-prototype-flatMap"><a href="#🔍-Array-prototype-flatMap" class="headerlink" title="🔍 Array.prototype.flatMap()"></a>🔍 Array.prototype.flatMap()</h3><h3 id="Array-prototype-forEach"><a href="#Array-prototype-forEach" class="headerlink" title="Array.prototype.forEach()"></a>Array.prototype.forEach()</h3><h3 id="Array-prototype-includes"><a href="#Array-prototype-includes" class="headerlink" title="Array.prototype.includes()"></a>Array.prototype.includes()</h3><h3 id="Array-prototype-indexOf"><a href="#Array-prototype-indexOf" class="headerlink" title="Array.prototype.indexOf()"></a>Array.prototype.indexOf()</h3><h3 id="Array-prototype-join"><a href="#Array-prototype-join" class="headerlink" title="Array.prototype.join()"></a>Array.prototype.join()</h3><h3 id="Array-prototype-keys"><a href="#Array-prototype-keys" class="headerlink" title="Array.prototype.keys()"></a>Array.prototype.keys()</h3>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>donley</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://donglei.site/blog/2018/05/23/ES API探底系列（一）：Array/">http://donglei.site/blog/2018/05/23/ES API探底系列（一）：Array/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY<strong>?</strong></strong></span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/blog/tags/JavaScript/"># JavaScript</a>
+                    
+                        <a href="/blog/tags/MDN/"># MDN</a>
+                    
+                        <a href="/blog/tags/前端/"># 前端</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/blog/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/blog/2018/08/30/Koa-2-中间件加载机制解析/">Koa@2 中间件加载机制解析</a>
+            
+            
+            <a class="next" rel="next" href="/blog/2018/05/11/快速上手-react/">快速上手--react</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <!-- <span>© donley | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span> -->
+        <span>© donley</span>
+    </div>
+</footer>
+
+    </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="donley">
+
+
+
+    <meta name="description" content="热爱这个破碎的世界吧">
+
+
+
+<title>Koa@2 中间件加载机制解析 | Donley&#39;s Notes</title>
+
+
+
+    <link rel="icon" href="/blog/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/blog/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/blog/js/script.js"></script>
+    
+    <script src="/blog/js/tocbot.min.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/blog/">Donley&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/blog/">Donley&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/blog/archives">Posts</a>
+                
+                    <a class="menu-item" href="/blog/category">Categories</a>
+                
+                    <a class="menu-item" href="/blog/tag">Tags</a>
+                
+                    <a class="menu-item" href="/blog/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Koa@2 中间件加载机制解析</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">donley</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">August 30, 2018&nbsp;&nbsp;0:28:40</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/blog/categories/Node-js/">Node.js</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>Koa 是 tj 主导的一个相比于 Express 很小的 Nodejs Web 框架。它支持大部分 es7 的语法比如 async，await 函数。<br>提供了主要为<code>use()</code>的函数库，通过自己编写中间件实现一个健壮的 web 应用。</p>
+<a id="more"></a>
+<h2 id="与-Exprees-对比"><a href="#与-Exprees-对比" class="headerlink" title="与 Exprees 对比"></a>与 Exprees 对比</h2><p>本文主要探究它的中间件加载机制，所以主要讨论中间件的内容。</p>
+<h3 id="Express"><a href="#Express" class="headerlink" title="Express"></a>Express</h3><p>就拿 Express 来说，它是类似这样的：</p>
+<blockquote>
+<p>Request -&gt; middleware1 -&gt;…-&gt; middleware2 -&gt; Response</p>
+</blockquote>
+<p>而且在中间件执行过程中，如果没有终结或者说返回 <code>Response</code>时，就必须调用<code>next()</code>方法直到请求处理结束，否则这个请求会被挂起。</p>
+<h3 id="Koa"><a href="#Koa" class="headerlink" title="Koa"></a>Koa</h3><p>关于 Koa 中间件的执行过程，就譬如下面这一段代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">···</span><br><span class="line">app.use(<span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">&#125;);</span><br><span class="line">app.use(<span class="keyword">async</span> (ctx, next) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">3</span>);</span><br><span class="line">&#125;);</span><br><span class="line">···</span><br></pre></td></tr></table></figure>
+<p>假如这是应用注册的两个中间件，请求的时候这段代码的输出结果将会是<br>1，2，3，4<br>为什么呢？<br>因为当 Koa 的中间件在遇到<code>await next()</code>的时候就会跳过其后的代码去执行下一个中间件的代码，依次一直到有了请求返回也就是中间件执行到最后一个的时候就会按照倒序返回执行<code>await next()</code>之后的代码。这样说可能不好理解。网上有一张洋葱圈模型可以很好的解释这个流程。<br><img src="http://ojxko64c5.bkt.clouddn.com/%E6%B4%8B%E8%91%B1%E5%9C%88%E6%A8%A1%E5%9E%8B-koajs.png" alt></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>有了这个机制，我们可以很方便的封装一些 cookie 处理、服务响应时间等有用的中间件。<br>但是带来便利的同时为什么可以完美的按照这个顺序执行呢？带着疑问我打开了 koajs 的源码。<br>（不得不说 tj 大神写的代码真是既优雅又实用）</p>
+<h3 id="中间件流程"><a href="#中间件流程" class="headerlink" title="中间件流程"></a>中间件流程</h3><p> 大概说一下，koa 内部声明了一个叫<code>middleware</code>的空数组，每次执行<code>app.use</code>的时候，都会有一个<code>push</code>方法把中间件的函数存进去。<br>接着我们可以在<code>/lib/application.js</code>的 127 行左右找到关于<code>middleware</code>的处理，原来是传入了一个叫<code>compose</code>的方法内。</p>
+<h3 id="koa-compose"><a href="#koa-compose" class="headerlink" title="koa-compose"></a>koa-compose</h3><p>原来中间件的处理单独放在了一个 repo 里，找到之后只有一个<code>index.js</code>文件。<br>打开如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span>(<span class="params">middleware</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">Array</span>.isArray(middleware))</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"Middleware stack must be an array!"</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> fn <span class="keyword">of</span> middleware) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">"function"</span>)</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">"Middleware must be composed of functions!"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@param <span class="type">&#123;Object&#125;</span> <span class="variable">context</span></span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@return <span class="type">&#123;Promise&#125;</span></span></span></span><br><span class="line"><span class="comment">   * <span class="doctag">@api <span class="variable">public</span></span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 返回一个dispatch函数,dispatch会返回内部 Promosie.resolve，可以通过.then方法接收</span></span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">context, next</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// last called middleware #</span></span><br><span class="line">    <span class="keyword">let</span> index = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> dispatch(<span class="number">0</span>); <span class="comment">// 0为第一个中间件</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params">i</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (i &lt;= index)</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"next() called multiple times"</span>));</span><br><span class="line">      index = i;</span><br><span class="line">      <span class="keyword">let</span> fn = middleware[i];</span><br><span class="line">      <span class="keyword">if</span> (i === middleware.length) fn = next;</span><br><span class="line">      <span class="keyword">if</span> (!fn) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve();</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 递归执行</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(fn(context, dispatch.bind(<span class="literal">null</span>, i + <span class="number">1</span>)));</span><br><span class="line">      &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="简化"><a href="#简化" class="headerlink" title="简化"></a>简化</h3><p>可能大部人看到这里还是不明白为什么会按照“洋葱”的顺序执行。<br>我们可以把这幅代码简化一下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span>(<span class="params">middleware</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">context, next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> index = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">return</span> dispatch(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span>(<span class="params">i</span>) </span>&#123;</span><br><span class="line">      index = i;</span><br><span class="line">      <span class="keyword">let</span> fn = middleware[i];</span><br><span class="line">      <span class="keyword">if</span> (i === middleware.length) &#123;</span><br><span class="line">        fn = next;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (!fn) <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">return</span> fn(context, <span class="function"><span class="keyword">function</span> <span class="title">next</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> dispatch(i + <span class="number">1</span>);</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> ms = [</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">ctx, next</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"1"</span>);</span><br><span class="line">    next();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"3"</span>);</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">bar</span>(<span class="params">ctx, next</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"2"</span>);</span><br><span class="line">    next();</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"3"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">];</span><br><span class="line">compose(ms)();</span><br></pre></td></tr></table></figure>
+<p>我们会惊奇的发现这段代码的执行结果竟然和 koajs 的中间件顺序一模一样。<br>观察发现我们是把 <code>Promise</code> 对象相关的内容去掉，换为原始的回调函数实现。</p>
+<p>So,这个时候我们回到了最最最初的起点就是回调函数与异步。对于中间件数组来说，从<code>index</code>=0 开始执行，当在某个中间件中执行<code>next()</code>的时候，其实就行在执行下一个中间件，依次一直执行到这个次序结束。那么在这个过程中<code>next()</code>之后的代码在 js 的事件机制来说就会被放入一个事件“队列”里。<br>然而，这个队列本质上是一个栈，遵循先进后出和后进先出的原则，所以到最后一个的时候又会按照逆序执行一遍。<br>这时候再回头去看之前的源码就会发现简单多了</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>总之还是感觉是对新特性的掌握度不够，同样的道理加一些干扰就会影响理解上的进度。<br>欢迎吐槽。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>donley</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://donglei.site/blog/2018/08/30/Koa-2-中间件加载机制解析/">http://donglei.site/blog/2018/08/30/Koa-2-中间件加载机制解析/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY<strong>?</strong></strong></span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/blog/tags/JavaScript/"># JavaScript</a>
+                    
+                        <a href="/blog/tags/Nodejs/"># Nodejs</a>
+                    
+                        <a href="/blog/tags/Koa/"># Koa</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/blog/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/blog/2020/03/24/关于JS对象/">关于JS对象</a>
+            
+            
+            <a class="next" rel="next" href="/blog/2018/05/23/ES API探底系列（一）：Array/">ES API探底系列（一）：Array</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <!-- <span>© donley | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span> -->
+        <span>© donley</span>
+    </div>
+</footer>
+
+    </div><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>
