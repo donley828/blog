@@ -5,8 +5,8 @@
 # Site
 title: Donley's Notes
 subtitle: 
-description: 学习笔记，生活感想，项目总结，谢东磊的博客
-author: 谢东磊
+description: 热爱这个破碎的世界吧
+author: donley
 language: zh-Hans
 timezone:
 avatar: https://avatars3.githubusercontent.com/u/19424162?v=4&u=17a78d0df38133bc82ec836db5b8079a43258847&s=400
@@ -76,7 +76,8 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+# theme: next
+theme: chic
 
 search:
   path: search.xml
