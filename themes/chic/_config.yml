@@ -9,14 +9,14 @@ nav:
   About: /about
 
 # favicon
-favicon: /favicon.ico
+favicon: /image/1600329935002.jpg
 
 # Profile
 nickname: Donley
 
 ### this variable is MarkDown form.
 description: 这个世界会好吗
-avatar: /image/avatar.jpeg
+avatar: /image/1600329935002.jpg
 
 # main menu navigation
 ## links key words should not be changed.
