@@ -7,29 +7,29 @@
     </url>
     
     <url>
-        <loc>http://donglei.site/blog/category/</loc>
-        <lastmod>2020-03-25T11:06:24.760Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>http://donglei.site/blog/tag/</loc>
-        <lastmod>2020-03-25T11:06:07.597Z</lastmod>
+        <loc>http://donglei.site/blog/404.html</loc>
+        <lastmod>2020-11-07T03:53:53.688Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
         <loc>http://donglei.site/blog/about/</loc>
-        <lastmod>2020-03-24T09:57:02.259Z</lastmod>
+        <lastmod>2020-11-07T03:53:53.688Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>http://donglei.site/blog/404.html</loc>
-        <lastmod>2020-03-24T09:57:02.257Z</lastmod>
+        <loc>http://donglei.site/blog/category/</loc>
+        <lastmod>2020-11-07T03:53:53.688Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>http://donglei.site/blog/tag/</loc>
+        <lastmod>2020-11-07T03:53:53.688Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>

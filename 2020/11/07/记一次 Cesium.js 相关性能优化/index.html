@@ -13,7 +13,7 @@
 
 
 
-<title>关于JS对象 | Donley&#39;s Notes</title>
+<title>记一次 Cesium.js 相关性能优化 | Donley&#39;s Notes</title>
 
 
 
@@ -175,7 +175,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">关于JS对象</h1>
+            <h1 class="post-title">记一次 Cesium.js 相关性能优化</h1>
             
                 <div class="post-meta">
                     
@@ -184,7 +184,7 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">March 24, 2020&nbsp;&nbsp;17:04:00</a>
+                        Date: <a href="#">November 7, 2020&nbsp;&nbsp;11:27:52</a>
                         </span>
                     
                     
@@ -200,29 +200,22 @@
         </header>
 
         <div class="post-content">
-            <h1 id="关于-JS-对象"><a href="#关于-JS-对象" class="headerlink" title="关于 JS 对象"></a>关于 JS 对象</h1><p>JS 中的对象是一组无序的键值对</p>
-<p>对象属性一般有两类属性，数据属性和访问器属性</p>
-<p>数据属性包括四个特征：</p>
-<ul>
-<li>value：属性的值</li>
-<li>writable：决定属性能否被修改</li>
-<li>enumerable：决定 for in 能否枚举该属性</li>
-<li>configurable：决定属性能否被删除或者修改其特征值</li>
-</ul>
-<p>访问器属性：</p>
-<ul>
-<li>getter：undefined或者函数，取属性值时调用</li>
-<li>setter：undefined或者函数，设置属性值时调用</li>
-<li>enumerable：决定 for in 能否枚举该属性</li>
-<li>configurable：决定该属性能否被删除或者改变特征值</li>
-</ul>
-<p>这两种对象属性的特征值，可以通过 Object.getOwnPropertyDescriptor() 获得，</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o = &#123; <span class="attr">a</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="built_in">Object</span>.getOwnPropertyDescriptor(o, <span class="string">'a'</span>) <span class="comment">// &#123;value: 1, writable: true, enumerable: true, configurable: true&#125;</span></span><br></pre></td></tr></table></figure>
-<p>ES5 的 Object.defineProperty 方法可以定义这些特征值</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o = &#123; <span class="attr">a</span>: <span class="number">1</span> &#125;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(o, <span class="string">'a'</span>, &#123;</span><br><span class="line">  value: <span class="number">5</span>,</span><br><span class="line">  ···</span><br><span class="line">&#125;)</span><br><span class="line">o.a <span class="comment">// 5</span></span><br></pre></td></tr></table></figure>
-<h2 id="对象的原型"><a href="#对象的原型" class="headerlink" title="对象的原型"></a>对象的原型</h2><p>原型在 JS 中就是一个对象，我们创建的每一个对象都有私有字段 [[prototype]]，就是对象的原型</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o = &#123;&#125;</span><br><span class="line">o.__proto__</span><br></pre></td></tr></table></figure>
-<p>在读取一个对象的属性时，如果当前对象没有此属性，会继续访问对象的原型，直到原型为空或者找到为止。</p>
+            <p>在公司项目的综合概览-电子地图模块，为了达到离线部署的目的，使用了 Cesium.js 做了地图渲染引擎。但是在开发结束之后发现地图渲染过程中有明显卡顿，尤其是四周的几个使用了 <transition> 的数据图框实际帧数不到10FPS，简直是肉眼可见的卡。</transition></p>
+<h3 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h3><p>首先使用 Chrome 的 devtools 进行了一下性能分析。如下图：</p>
+<p><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fed5ae17ca434924846d4df84dc65eef~tplv-k3u1fbpfcp-watermark.image" alt></p>
+<p>这是这个地图模块从点击菜单路由开始到全部资源和动画加载执行完成的时间，抛开时间不说，几个动画执行时的 fps 只有不到10，简直就是几张ppt。而且大部分时间都消耗在了 JS 运行上。于是进一步查看 Call Tree，果不其然，那几个红标的长耗时基本上都是 Cesium.js 的渲染流程。</p>
+<p><img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/98d2d441af2447e688fe23c28e08d401~tplv-k3u1fbpfcp-watermark.image" alt></p>
+<h3 id="数据劫持"><a href="#数据劫持" class="headerlink" title="数据劫持"></a>数据劫持</h3><p>因为 Cesium.js 是第三方库，所以直接分析代码的执行流程也是不可行的。这时候只能去 Google 碰碰运气，发现 Vue-数据劫持 这个名词出现频率比较高。其实数据劫持就是通过 Object.defineProperty 去劫持的对象的 setter 和 getter操作，比如在数据更新的时候同时更新 DOM。就是双向绑定的原理。</p>
+<p>这个时候我再回去看了一眼代码。</p>
+<p><img src="https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0086ed223321460ab1dabb930dc7a063~tplv-k3u1fbpfcp-watermark.image" alt></p>
+<p>果然把 viewer (Cesium.js 初始化的地图对象) 保存在了 Vue 实例上，而且在各种事件操作中大量调用。</p>
+<p>后来只能把这个对象保存在 window 上，即使不是一个很优雅的办法。</p>
+<h3 id="闹鬼了"><a href="#闹鬼了" class="headerlink" title="闹鬼了"></a>闹鬼了</h3><p>这一套操作结束之后，发现并没有什么卵用，虽然进入页面时间有所改善，但是那几个 <transition> 还是肉眼可见的卡，尤其是手动显示隐藏的操作基本上没有什么变化。</transition></p>
+<p><img src="https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4ec07128b8084b48bf8f42f873c09ba9~tplv-k3u1fbpfcp-watermark.image" alt></p>
+<p>我只好针手动显示隐藏这个过程再进行一次分析，然后发现整个渲染时长基本没什么变化，还是很久，最长的依然是 JS 运行。再次查看 Call Tree 大部分时间都耗费在地图的 resize() 方法上。查看代码发现我只是控制了几个 div 的显示隐藏，为什么会出发地图的重新渲染呢。然后只能点点点，最后我的注意力落在了一个滚动条上面。</p>
+<p>滚动条的出现改变了页面主体的宽度，容器宽度的变化导致 Cesium 出发 resize() 方法，长耗时的 JS 阻塞了动画的执行造成了卡顿。</p>
+<p>机智的我赶紧给 div#app 添加了一行 overflow-x: hidden; 再刷新一遍，完美解决。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>整个分析过程也没持续多长时间，主要原因还是因为开发过程还是太相信 CPU 的执行效率和第三方库对性能处理。真的遇到性能问题的时候，大部分原因还是在业务代码的不合理上。而且作为前端，大部分代码还是运行在客户的机器上，还是要尽量的“向下兼容”。</p>
 
         </div>
 
@@ -237,7 +230,7 @@
                 
                     <p class="copyright-item">
                         <span>Permalink:</span>
-                        <span><a href="http://donglei.site/blog/2020/03/24/关于JS对象/">http://donglei.site/blog/2020/03/24/关于JS对象/</a></span>
+                        <span><a href="http://donglei.site/blog/2020/11/07/记一次 Cesium.js 相关性能优化/">http://donglei.site/blog/2020/11/07/记一次 Cesium.js 相关性能优化/</a></span>
                     </p>
                 
                 
@@ -261,7 +254,13 @@
                 <span class="tag">
                     
                     
-                        <a href="/blog/tags/前端，JavaScript/"># 前端，JavaScript</a>
+                        <a href="/blog/tags/前端/"># 前端</a>
+                    
+                        <a href="/blog/tags/Gis/"># Gis</a>
+                    
+                        <a href="/blog/tags/可视化/"># 可视化</a>
+                    
+                        <a href="/blog/tags/性能优化/"># 性能优化</a>
                     
                         
                 </span>
@@ -274,10 +273,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/blog/2020/11/07/记一次 Cesium.js 相关性能优化/">记一次 Cesium.js 相关性能优化</a>
             
-            
-            <a class="next" rel="next" href="/blog/2018/08/30/Koa-2-中间件加载机制解析/">Koa@2 中间件加载机制解析</a>
+            <a class="next" rel="next" href="/blog/2020/03/24/关于JS对象/">关于JS对象</a>
             
         </section>
 
